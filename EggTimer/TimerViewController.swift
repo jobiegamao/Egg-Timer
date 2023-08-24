@@ -6,6 +6,7 @@
 //  Copyright © 2023 The App Brewery. All rights reserved.
 //
 
+import AVFoundation
 import UIKit
 
 class TimerViewController: UIViewController {
@@ -16,6 +17,7 @@ class TimerViewController: UIViewController {
     @IBOutlet weak var doneButton: UIButton!
     @IBOutlet weak var timerLabel: UILabel!
     @IBOutlet weak var progressView: UIProgressView!
+    var audioPlayer: AVAudioPlayer?
     var timer: Timer = Timer()
     var timerCount = 0 {
         didSet {
@@ -23,11 +25,12 @@ class TimerViewController: UIViewController {
                 timerLabel.text = "\(timerCount) Seconds Left"
             } else {
                 timerLabel.text = "Egg is \(eggButtonTapped) Cooked"
+                audioPlayer?.play()
                 showDoneButton()
             }
             
-            let progress = 1  - (timerCount / eggButtonTapped.timer)
-            self.progressView.progress = Float(progress)
+            let progress = 1.0  - Float(timerCount) / Float(eggButtonTapped.timer)
+            self.progressView.progress = progress
         }
     }
     var eggButtonTapped: Egg = .Soft
@@ -35,6 +38,14 @@ class TimerViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         onStartTimer()
+        if let soundURL = Bundle.main.url(forResource: "alarm_sound", withExtension: "mp3") {
+            do {
+                audioPlayer = try AVAudioPlayer(contentsOf: soundURL)
+                audioPlayer?.prepareToPlay()
+            } catch {
+                print("Error loading sound file:", error.localizedDescription)
+            }
+        }
     }
     
     private func showDoneButton() {
